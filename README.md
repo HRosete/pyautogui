@@ -1,1 +1,1 @@
-# pyautogui
+# pyautogui-adi
