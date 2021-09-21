@@ -1,13 +1,13 @@
-from setuptools import setup
+import setuptools
 
 
-setup(
-    name="",
-    version="",
-    description="",
-    url="",
+setuptools.setup(
+    name="pyautogui-adi",
+    # version="",
+    description="ADI's UI Test using PyAutoGUI",
+    url="https://github.com/HRosete/pyautogui-adi.git",
     author="Hannah Mae Nicole Rosete",
     author_email="Hannah.Rosete@analog.com",
-    license="",
-    packages=[""],
+    # license="",
+    packages=setuptools.find_packages(),
 )
