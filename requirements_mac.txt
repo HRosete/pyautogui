@@ -2,3 +2,4 @@ pyobj-core
 pyobjc
 pyautogui
 opencv-python
+pytesseract
