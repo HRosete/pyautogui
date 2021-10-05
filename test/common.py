@@ -173,13 +173,13 @@ def popup_dialog_box(cmd="close"):
     update_popup_img = os.path.join(image_path, "auto_update_popup.png")
     locate_and_click_image(update_popup_img)
 
-    if cmd == "yes".lower():
+    if cmd.lower() == "yes":
         yes_img = os.path.join(image_path, "yes.png")
         locate_and_click_image(yes_img)
-    elif cmd == "no".lower():
+    elif cmd.lower() == "no":
         no_img = os.path.join(image_path, "no.png")
         locate_and_click_image(no_img)
-    elif cmd == "close".lower():
+    elif cmd.lower() == "close":
         close_img = os.path.join(image_path, "close.png")
         locate_and_click_image(close_img)
     time.sleep(3)
