@@ -185,7 +185,7 @@ def popup_dialog_box(cmd="close"):
     time.sleep(3)
 
 
-def choose_device(device, connection):
+def choose_device(device, connection="usb"):
     """choose_device: Chooses a device to connect to.
 
     parameters:
@@ -196,16 +196,39 @@ def choose_device(device, connection):
             Connection of the device with regards to your machine.
             Options are: usb, ip, demo
     """
-    if device == "m2k".lower():
+    if device.lower() == "m2k":
         img = os.path.join(image_path, "m2k.png")
-        coord = pyautogui.locateOnScreen(img, confidence=0.8)
-        left, top, width, height = coord
-        # print(coord)
+    # elif device.lower() == "pluto":
+    #     img = os.path.join(image_path, "pluto.png")
 
+    x, y = 0, 0
+    coords = pyautogui.locateAllOnScreen(img, confidence=0.95)
+    for c in coords:
+        l, t, w, h = c
         s1 = screenshot_region_and_save(
-            screenshots_path, left, (top + height), width, height-105, filename="s1.png")
-        ui_text = read_text_from_image(s1, threshold=50)
-        print(ui_text)
+            screenshots_path, l, (t + h), w, h-105, filename="s1.png")
+        ui_text = read_text_from_image(s1, threshold=90)
+        if connection.lower() == "demo":
+            if "ip:127.0.0.1" in ui_text:
+                x, y = pyautogui.center(c)
+                break
+            else:
+                continue
+        elif connection.lower() == "ip":
+            if "ip:192" in ui_text:
+                x, y = pyautogui.center(c)
+                break
+            else:
+                continue
+        elif connection.lower() == "usb":
+            if connection in ui_text:
+                x, y = pyautogui.center(c)
+                break
+            else:
+                continue
+    pyautogui.moveTo(x, y, 1, pyautogui.easeOutQuad)
+    pyautogui.click()
+    time.sleep(2)
 
 
 def connect():
@@ -269,6 +292,15 @@ def disable_demo():
     """disable_demo: Disable M2K demo mode"""
     disable_demo_img = os.path.join(image_path, "disable_demo.png")
     x, y = locate_image_with_str(disable_demo_img)
+    pyautogui.moveTo(x, y, 1, pyautogui.easeOutQuad)
+    pyautogui.click()
+    time.sleep(2)
+
+
+def add_device():
+    """add_device: Add device through IP"""
+    add_device_img = os.path.join(image_path, "add_device.png")
+    x, y = locate_image_with_str(add_device_img)
     pyautogui.moveTo(x, y, 1, pyautogui.easeOutQuad)
     pyautogui.click()
     time.sleep(2)
