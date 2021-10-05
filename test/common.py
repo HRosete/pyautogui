@@ -75,20 +75,20 @@ def close_program_linux(pid):
         print(str(e))
 
 
-def screenshot_region_and_save(dir, l, t, w, h, filename="screenshot.png"):
+def screenshot_region_and_save(dir, left, top, width, height, filename="screenshot.png"):
     """screenshot_region_and_save: Saves screenshot from pyautogui and returns the
     path, filename, and extension of the saved screenshot
 
     parameters:
         dir: type=path
             Path to where you want to save the screenshot
-        l: type=int
+        left: type=int
             Left coordinate of the region to screenshot
-        t: type=int
+        top: type=int
             Top coordinate of the region to screenshot
-        w: type=int
+        width: type=int
             Width in pixels of the region to screenshot
-        h: type=int
+        height: type=int
             Height in pixels of the region to screenshot
         filename: type=string
             Filename and extension for the screenshot
@@ -96,7 +96,7 @@ def screenshot_region_and_save(dir, l, t, w, h, filename="screenshot.png"):
         file: type=path
             The path, filename,and extension of the saved screenshot
     """
-    picture = pyautogui.screenshot(region=(l, t, w, h))
+    picture = pyautogui.screenshot(region=(left, top, width, height))
     file = os.path.join(dir, filename)
     picture.save(file)
     return file
@@ -196,7 +196,16 @@ def choose_device(device, connection):
             Connection of the device with regards to your machine.
             Options are: usb, ip, demo
     """
-    pass
+    if device == "m2k".lower():
+        img = os.path.join(image_path, "m2k.png")
+        coord = pyautogui.locateOnScreen(img, confidence=0.8)
+        left, top, width, height = coord
+        # print(coord)
+
+        s1 = screenshot_region_and_save(
+            screenshots_path, left, (top + height), width, height-105, filename="s1.png")
+        ui_text = read_text_from_image(s1, threshold=50)
+        print(ui_text)
 
 
 def connect():
