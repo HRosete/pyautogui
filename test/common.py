@@ -39,7 +39,7 @@ def open_program_linux(app):
         global PID
         subprocess.run(f"{app} &", shell=True, check=True)
         a = subprocess.run("echo $!", shell=True, capture_output=True)
-        PID = a.stdout.decode()  # Call as common.PID
+        PID = a.stdout.decode()  # Call as common.PID or PID
     except Exception as e:
         print(str(e))
         assert False, f"Kindly install the latest release of {app}."
@@ -75,9 +75,10 @@ def close_program_linux(pid):
         print(str(e))
 
 
-def screenshot_region_and_save(dir, left, top, width, height, filename="screenshot.png"):
-    """screenshot_region_and_save: Saves screenshot from pyautogui and returns the
-    path, filename, and extension of the saved screenshot
+def screenshot_region_and_save(dir, left=0, top=0, width=1920, height=1080, filename="screenshot.png"):
+    """screenshot_region_and_save: Saves screenshot from pyautogui and returns the path,
+    filename, and extension of the saved screenshot. The default values for the left, top,
+    width, and height arguments are specified for 1920 by 1080 screen resolution.
 
     parameters:
         dir: type=path
@@ -119,13 +120,16 @@ def read_text_from_image(path_to_file, threshold=50):
     return text
 
 
-def locate_image_with_str(img):
+def locate_image_with_str(img, confidence_level=0.8):
     """locate_image_with_str: Locates the image with text in the UI, confirms it,
     and returns a tuple of the location
 
     parameters:
         img: type=path
             Absolute/relative path of the image
+        confidence_level: type=int
+            A scale that determines how accurate the image in the UI must be
+            from that of the reference image
     return:
         point: type=tuple
             x and y location coordinates in the UI
@@ -133,7 +137,7 @@ def locate_image_with_str(img):
     # img = os.path.join(image_path, "connect.png")
 
     # Reference image from filename
-    coord = pyautogui.locateOnScreen(img, confidence=0.8)
+    coord = pyautogui.locateOnScreen(img, confidence=confidence_level)
     left, top, width, height = coord
     ref_text = read_text_from_image(img, threshold=130)
 
@@ -150,15 +154,19 @@ def locate_image_with_str(img):
         assert False, "The image with text can't be found on the screen."
 
 
-def locate_and_click_image(img):
+def locate_and_click_image(img, confidence_level=0.8):
     """locate_and_click_image: Locates the specified image in the UI and clicks it.
 
     parameters:
         img: type=path
             Absolute/relative path of the image
+        confidence_level: type=int
+            A scale that determines how accurate the image in the UI must be
+            from that of the reference image
     """
-    image = pyautogui.locateCenterOnScreen(img, confidence=0.8)
-    pyautogui.click(image)
+    x, y = pyautogui.locateCenterOnScreen(img, confidence=confidence_level)
+    pyautogui.moveTo(x, y, 1, pyautogui.easeOutQuad)
+    pyautogui.click()
     time.sleep(2)
 
 
@@ -206,7 +214,7 @@ def choose_device(device, connection="usb"):
     for c in coords:
         l, t, w, h = c
         s1 = screenshot_region_and_save(
-            screenshots_path, l, (t + h), w, h-105, filename="s1.png")
+            screenshots_path, l, (t + h), w, 30, filename="s1.png")
         ui_text = read_text_from_image(s1, threshold=90)
         if connection.lower() == "demo":
             if "ip:127.0.0.1" in ui_text:
@@ -231,14 +239,19 @@ def choose_device(device, connection="usb"):
     time.sleep(2)
 
 
-def connect():
-    """connect: Connect UI to the chosen device"""
+def connect(duration=25):
+    """connect: Connect UI to the chosen device
+
+    parameter:
+        duration: type=int
+            Time sleep duration after executing the command in seconds
+    """
     connect_img = os.path.join(image_path, "connect.png")
     x, y = locate_image_with_str(connect_img)
     pyautogui.moveTo(x, y, 1, pyautogui.easeOutQuad)
     pyautogui.click()
     print("Connecting...")
-    time.sleep(25)
+    time.sleep(duration)
 
 
 def disconnect():
@@ -251,13 +264,18 @@ def disconnect():
     time.sleep(3)
 
 
-def identify():
-    """identify: Identify the chosen device"""
+def identify(duration=5):
+    """identify: Identify the chosen device
+
+    parameter:
+        duration: type=int
+            Time sleep duration after executing the command in seconds
+    """
     identify_img = os.path.join(image_path, "identify.png")
     x, y = locate_image_with_str(identify_img)
     pyautogui.moveTo(x, y, 1, pyautogui.easeOutQuad)
     pyautogui.click()
-    time.sleep(5)
+    time.sleep(duration)
 
 
 def forget_device():
@@ -269,14 +287,19 @@ def forget_device():
     time.sleep(5)
 
 
-def calibrate():
-    """calibrate: Forget the chosen device"""
+def calibrate(duration=10):
+    """calibrate: Forget the chosen device
+
+    parameter:
+        duration: type=int
+            Time sleep duration after executing the command in seconds
+    """
     calibrate_img = os.path.join(image_path, "calibrate.png")
     x, y = locate_image_with_str(calibrate_img)
     pyautogui.moveTo(x, y, 1, pyautogui.easeOutQuad)
     pyautogui.click()
     print("Calibrating...")
-    time.sleep(10)
+    time.sleep(duration)
 
 
 def enable_demo():
@@ -297,19 +320,30 @@ def disable_demo():
     time.sleep(2)
 
 
-def add_device():
-    """add_device: Add device through IP"""
+def add_device(ip="", confidence_level=0.95):
+    """add_device: Add device through IP
+
+    parameter:
+        ip: type=string
+            IP of the device to be connected
+        confidence_level: type=int
+            A scale that determines how accurate the image in the UI must be
+            from that of the reference image
+    """
     add_device_img = os.path.join(image_path, "add_device.png")
-    x, y = locate_image_with_str(add_device_img)
-    pyautogui.moveTo(x, y, 1, pyautogui.easeOutQuad)
-    pyautogui.click()
-    time.sleep(2)
+    locate_and_click_image(add_device_img, confidence_level)
+    if ip:
+        pyautogui.moveRel(0, 155, 0.5, pyautogui.easeOutQuad)
+        pyautogui.click()
+        pyautogui.PAUSE
+        pyautogui.write(ip, interval=0.1)
+        time.sleep(2)
 
 
 def add():
     """add: Add device that is connected via IP"""
     add_img = os.path.join(image_path, "add.png")
-    x, y = locate_image_with_str(add_img)
+    x, y = locate_image_with_str(add_img, confidence_level=0.8)
     pyautogui.moveTo(x, y, 1, pyautogui.easeOutQuad)
     pyautogui.click()
     time.sleep(2)
@@ -323,7 +357,3 @@ def register():
     pyautogui.click()
     time.sleep(2)
     # Add steps for registering the device online
-
-
-def screenshot_ui():
-    pass
