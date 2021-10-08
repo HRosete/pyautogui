@@ -3,3 +3,4 @@ pyobjc
 pyautogui
 opencv-python
 pytesseract
+pytest
